@@ -1,0 +1,138 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <string>
+#include <iomanip>
+#include <vector>
+#include <algorithm>  // Added for find_if
+using namespace std;
+
+class Hostel {
+public:
+    int rollno;
+    string name;
+    string location;
+    string gender;
+    int roomno;
+};
+
+class HostelManager {
+private:
+    static const int LOWER_ROOM_LIMIT = 100;
+    static const int UPPER_ROOM_LIMIT = 500;
+
+public:
+    int getRoomNo() {
+        srand(time(0));
+        return ((rand() % (UPPER_ROOM_LIMIT - LOWER_ROOM_LIMIT + 1)) + LOWER_ROOM_LIMIT);
+    }
+
+    void create(Hostel& h) {
+        cout << "Enter roll number: ";
+        cin >> h.rollno;
+        cout << "Enter Name: ";
+        cin >> h.name;
+        cout << "Enter location: ";
+        cin >> h.location;
+        cout << "Enter gender: ";
+        cin >> h.gender;
+        h.roomno = getRoomNo();
+
+        cout << "Room Allocated Successfully!!!" << endl;
+    }
+
+    void display(const Hostel& h) {
+        cout << "\n----------------------------------------------------------------------\n";
+        cout << setw(10) << left << "RollNo" << setw(20) << left << "Name" << setw(15) << left << "Location" << setw(10) << left << "Gender" << setw(5) << left << "RoomNo" << endl;
+        cout << "----------------------------------------------------------------------\n";
+        cout << setw(10) << left << h.rollno << setw(20) << left << h.name << setw(15) << left << h.location << setw(10) << left << h.gender << setw(5) << left << h.roomno << endl;
+    }
+
+    void del(Hostel& h) {
+        h.rollno = 0;
+        h.name = "";
+        h.location = "";
+        h.gender = "";
+        h.roomno = 0;
+        cout << "Record deleted successfully." << endl;
+    }
+
+    void search(int rollNumber, const vector<Hostel>& students) {
+        auto it = find_if(students.begin(), students.end(), [rollNumber](const Hostel& s) {
+            return s.rollno == rollNumber;
+        });
+
+        if (it != students.end()) {
+            display(*it);
+        } else {
+            cout << "Student with Roll Number " << rollNumber << " not found." << endl;
+        }
+    }
+};
+
+int main() {
+    cout << "\t\t\tHostel Room Allocation" << endl;
+    int ch;
+
+    HostelManager hostelManager;
+    vector<Hostel> students; // Using a vector to store multiple students
+
+    do {
+        cout << "\n1-ALLOCATE NEW ROOM"
+             << "\n2-DISPLAY"
+             << "\n3-SEARCH"
+             << "\n4-DELETE"
+             << "\n5-EXIT" << endl;
+        cout << "Enter your choice: ";
+        cin >> ch;
+
+        switch (ch) {
+            case 1:
+                {
+                    Hostel student;
+                    hostelManager.create(student);
+                    students.push_back(student);
+                }
+                break;
+            case 2:
+                for (const auto& student : students) {
+                    hostelManager.display(student);
+                }
+                break;
+            case 4:
+                {
+                    int rollToDelete;
+                    cout << "Enter the roll number to delete: ";
+                    cin >> rollToDelete;
+
+                    auto it = find_if(students.begin(), students.end(), [rollToDelete](const Hostel& s) {
+                        return s.rollno == rollToDelete;
+                    });
+
+                    if (it != students.end()) {
+                        hostelManager.del(*it);
+                        students.erase(it);
+                    } else {
+                        cout << "Student with Roll Number " << rollToDelete << " not found." << endl;
+                    }
+                }
+                break;
+            case 5:
+                cout << "\n\t\t\tProgram Terminated!!!" << endl;
+                break;
+            case 3:
+                {
+                    int rollToSearch;
+                    cout << "Enter the roll number to search: ";
+                    cin >> rollToSearch;
+
+                    hostelManager.search(rollToSearch, students);
+                }
+                break;
+            default:
+                cout << "Enter among the given numbers" << endl;
+        }
+    } while (ch != 5);
+
+    return 0;
+}
